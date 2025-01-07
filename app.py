@@ -73,6 +73,89 @@ def viewPro():
         print("\n\tProduct Not Found!")
     input("\n\t--- Press Enter Key To Continue...")
 
+# A Method to delete a product.
+def delPro():
+    pid = input("\n\tEnter Product ID : ")
+    query = "DELETE FROM product WHERE pid="+pid
+    cur.execute(query)
+    conn.commit()
+    if(cur.rowcount != 0):
+        print("\n\tProduct Deleted Successfully!")
+    else:
+        print("\n\tProduct Not Found!")
+    input("\n\t--- Press Enter To Continue...")
+
+# A Method to check Product Availablity
+def checkPro(pid):
+    query = "select * from product where pid="+pid
+    cur.execute(query)
+    cur.fetchall()
+    if(cur.rowcount == 0):
+        return False
+    else:
+        return True
+# A Method to check Customer Availablity
+def checkCus(cid):
+    query = "select * from customer where cid="+cid
+    cur.execute(query)
+    cur.fetchall()
+    if(cur.rowcount == 0):
+        return False
+    else:
+        return True
+
+# A Method to Place an Order
+def placeOrder():
+    cid = input("\n\tEnter Customer ID : ")
+    pid = input("\tEnter Product ID : ")
+    qty = input("\tEnter Quantity : ")
+    if( checkPro(pid) and checkCus(cid) ):
+        query = "INSERT INTO orders(cid,pid,qty) VALUE(%s,%s,%s)"
+        data = (cid,pid,qty)
+        cur.execute(query,data)
+        conn.commit()
+        print("\n\tOrder Placed Successfully!")
+    else:
+        print("\n\tEither PID or CID is incorrect!")
+    input("\n\t--- Press Enter To Continue...")
+
+# A Method to view all orders
+def viewAllOrders():
+    query = '''
+SELECT cname,pname,price,qty,price*qty FROM customer
+JOIN orders
+ON customer.cid = orders.cid
+JOIN product
+ON orders.pid = product.pid'''
+    cur.execute(query)
+    data = cur.fetchall()
+    print("\n\tName - Product - Price - Qty - Net_Amount\n")
+    for o in data:
+        print("\t",o[0]," - ",o[1]," - ",o[2]," - ",o[3]," - ",o[4])
+    input("\n\n\t--- Press Enter To Continue...")
+
+# A Method to view an order by customer ID
+def viewOrder():
+    cid = input("\n\tEnter Customer ID : ")
+    query = '''SELECT cname,pname,price,qty,price*qty FROM customer
+JOIN orders
+ON customer.cid = orders.cid
+JOIN product
+ON orders.pid = product.pid
+WHERE customer.cid = '''+cid
+    cur.execute(query)
+    d = cur.fetchall()
+    if(cur.rowcount != 0 ):
+        for data in d:
+            print("\n\tCustomer Name : ",data[0])
+            print("\tProduct Name : ",data[1])
+            print("\tProduct Price : ",data[2])
+            print("\tProduct Quantity : ",data[3])
+            print("\tNet Amount : ",data[4])
+    else:
+        print("\n\tNo Order Found on This Customer ID")
+    input("\n\t--- Press Enter To Continue...")
+
 
 # DASHBOARD
 while True:
@@ -101,3 +184,11 @@ while True:
         viewAllPro()
     elif(ch==5):
         viewPro()
+    elif(ch==6):
+        delPro()
+    elif(ch==7):
+        placeOrder()
+    elif(ch==8):
+        viewAllOrders()
+    elif(ch==9):
+        viewOrder()
